@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nine Sols — Character Resonance Test</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Шрифт Lexend Deca -->
+    <link href="https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-bg: #091F26;
+            --color-text: #EAD69C;
+            --color-accent: #69A38C;
+        }
+        body {
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            font-family: 'Lexend Deca', sans-serif;
+            background-image: linear-gradient(rgba(9, 31, 38, 0.90), rgba(9, 31, 38, 0.96)), url('https://ninesols.wiki.gg/images/New_Game_BG.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        /* Стилизация скроллбара */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #051318;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #69A38C;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-between p-4 md:p-8 relative">
+
+    <!-- Переключатель языков -->
+    <div class="absolute top-4 right-4 flex space-x-2 z-50">
+        <button onclick="setLanguage('en')" id="lang-btn-en" class="flex items-center space-x-1.5 px-3 py-1.5 rounded border border-[#69A38C]/40 bg-[#091F26]/90 text-xs font-semibold transition-all duration-200">
+            <span>🇺🇸</span> <span>EN</span>
+        </button>
+        <button onclick="setLanguage('ru')" id="lang-btn-ru" class="flex items-center space-x-1.5 px-3 py-1.5 rounded border border-[#69A38C]/40 bg-[#091F26]/90 text-xs font-semibold transition-all duration-200">
+            <span>🇷🇺</span> <span>RU</span>
+        </button>
+    </div>
+
+    <!-- Заголовок -->
+    <header class="w-full max-w-4xl text-center my-4 border-b border-[#69A38C]/30 pb-4">
+        <h1 class="text-3xl md:text-5xl font-black mb-2 tracking-widest text-[#EAD69C] drop-shadow-[0_2px_8px_rgba(234,214,156,0.25)]">
+            NINE SOLS
+        </h1>
+    </header>
+
+    <!-- Основное окно -->
+    <main class="w-full max-w-3xl flex-grow flex items-center justify-center my-6">
+        
+        <!-- ЭКРАН 1: Приветствие -->
+        <div id="start-screen" class="bg-[#091F26]/95 border-2 border-[#69A38C]/40 p-6 md:p-10 rounded-lg shadow-2xl text-center w-full max-w-2xl backdrop-blur-md transition-all duration-300">
+            <h2 id="start-title" class="text-2xl md:text-3xl font-bold mb-6 text-[#EAD69C]"></h2>
+            <p id="start-desc" class="text-sm md:text-base leading-relaxed mb-8 text-gray-300"></p>
+            <button onclick="startQuiz()" id="start-btn" class="px-8 py-4 bg-[#69A38C] text-[#091F26] font-bold text-lg rounded uppercase tracking-wider hover:bg-[#EAD69C] hover:scale-105 transition-all duration-300 shadow-[0_0_15px_rgba(105,163,140,0.3)]">
+            </button>
+        </div>
+
+        <!-- ЭКРАН 2: Опрос -->
+        <div id="quiz-screen" class="hidden bg-[#091F26]/95 border-2 border-[#69A38C]/40 p-6 md:p-8 rounded-lg shadow-2xl w-full backdrop-blur-md transition-all duration-300">
+            <div class="flex justify-between items-center mb-4 text-xs md:text-sm text-[#69A38C]">
+                <span id="question-number" class="font-semibold uppercase tracking-wider"></span>
+                <span id="progress-percent" class="font-semibold text-[#EAD69C]"></span>
+            </div>
+            <!-- Прогресс-бар -->
+            <div class="w-full bg-black/50 h-2 rounded-full mb-8 overflow-hidden border border-[#69A38C]/20">
+                <div id="progress-bar" class="bg-[#69A38C] h-full transition-all duration-300"></div>
+            </div>
+
+            <!-- Поле вопроса -->
+            <div class="min-h-[140px] flex items-center justify-center mb-8">
+                <p id="question-text" class="text-lg md:text-xl text-center font-medium leading-relaxed italic text-[#EAD69C]">
+                </p>
+            </div>
+
+            <!-- Варианты ответа -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                <button onclick="handleAnswer(-1)" id="btn-disagree" class="py-4 px-6 border border-red-900/40 bg-red-950/10 text-red-300 rounded hover:bg-red-900/35 hover:border-red-500 hover:text-white transition-all duration-200 font-bold text-sm uppercase tracking-wider">
+                </button>
+                <button onclick="handleAnswer(0)" id="btn-neutral" class="py-4 px-6 border border-gray-600/40 bg-gray-800/10 text-gray-300 rounded hover:bg-gray-700/35 hover:border-gray-400 hover:text-white transition-all duration-200 font-bold text-sm uppercase tracking-wider">
+                </button>
+                <button onclick="handleAnswer(1)" id="btn-agree" class="py-4 px-6 border border-[#69A38C]/30 bg-[#69A38C]/5 text-[#69A38C] rounded hover:bg-[#69A38C] hover:text-[#091F26] transition-all duration-200 font-bold text-sm uppercase tracking-wider">
+                </button>
+            </div>
+
+            <!-- Навигация -->
+            <div class="flex justify-between border-t border-[#69A38C]/20 pt-4">
+                <button id="back-btn" onclick="prevQuestion()" class="px-4 py-2 text-sm text-gray-400 hover:text-[#EAD69C] disabled:opacity-30 disabled:pointer-events-none transition-colors">
+                </button>
+                <button id="reset-btn" onclick="confirmReset()" class="px-4 py-2 text-sm text-red-400 hover:text-red-300 transition-colors">
+                </button>
+            </div>
+        </div>
+
+        <!-- ЭКРАН 3: Результаты -->
+        <div id="results-screen" class="hidden bg-[#091F26]/95 border-2 border-[#69A38C]/40 p-6 md:p-8 rounded-lg shadow-2xl w-full backdrop-blur-md transition-all duration-300">
+            <h2 id="results-title" class="text-2xl md:text-3xl font-extrabold text-center mb-6 text-[#69A38C] border-b border-[#69A38C]/20 pb-4 uppercase tracking-widest">
+            </h2>
+
+            <!-- Победитель -->
+            <div class="flex flex-col md:flex-row items-center md:items-start gap-6 mb-8 bg-black/30 p-5 rounded-lg border border-[#69A38C]/20">
+                <div class="w-40 h-40 md:w-48 md:h-48 shrink-0 rounded-lg overflow-hidden border-2 border-[#EAD69C] bg-black/40 flex items-center justify-center">
+                    <img id="winner-image" src="" alt="Winner" class="w-full h-full object-cover">
+                </div>
+                <div class="flex-grow text-center md:text-left">
+                    <span id="winner-subtitle-label" class="text-xs font-bold tracking-widest text-[#69A38C] uppercase"></span>
+                    <h3 id="winner-name" class="text-2xl md:text-3xl font-black text-[#EAD69C] mt-1 mb-3"></h3>
+                    <p id="winner-desc" class="text-xs md:text-sm leading-relaxed text-gray-300"></p>
+                </div>
+            </div>
+
+            <!-- Спектр Дао (Аккордеон) -->
+            <div class="mb-6">
+                <div class="flex flex-col sm:flex-row justify-between items-baseline mb-3">
+                    <h4 id="chart-title" class="text-base font-extrabold text-[#EAD69C] tracking-wide uppercase"></h4>
+                    <span id="chart-tip" class="text-[10px] text-gray-400 italic"></span>
+                </div>
+                <div id="scores-chart" class="space-y-2 max-h-[320px] overflow-y-auto pr-2">
+                    <!-- Заполняется динамически -->
+                </div>
+            </div>
+
+            <div class="flex justify-center pt-4 border-t border-[#69A38C]/20">
+                <button onclick="restartQuiz()" id="restart-btn" class="px-8 py-3 bg-[#69A38C] text-[#091F26] font-bold rounded uppercase tracking-wider hover:bg-[#EAD69C] transition-all duration-300">
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Подвал -->
+    <footer class="w-full text-center py-4 text-[10px] text-gray-500 mt-4">
+        Nine Sols Fan Project. All character portraits and background assets are property of Red Candle Games.
+    </footer>
+
+    <script>
+        // База локализации
+        const i18n = {
+            en: {
+                startTitle: "Who are you from the Nine Sols?",
+                startDesc: "Take this test of 50 questions to find out which of the Sols of New Kunlun resonates with your spirit. Unveil your balance of reasoning, devotion, and ambition.",
+                startBtn: "Start Trial",
+                questionNo: "Question {current} of {total}",
+                backBtn: "← Back",
+                resetBtn: "Reset Trial",
+                resultsTitle: "Resonance Results",
+                winnerSubtitle: "Your soul aligns with:",
+                chartTitle: "Your Dao Spectrum:",
+                chartTip: "(Click on any Sol below to view their profile)",
+                restartBtn: "Restart Trial",
+                disagree: "Disagree",
+                neutral: "Neutral",
+                agree: "Agree",
+                resetConfirm: "Are you sure you want to reset your progress and start over?"
+            },
+            ru: {
+                startTitle: "Кто вы из Девяти Солов?",
+                startDesc: "Пройдите испытание из 50 вопросов, чтобы определить, чьи идеалы, цели и внутренние конфликты ближе всего вашему собственному разуму.",
+                startBtn: "Начать испытание",
+                questionNo: "Вопрос {current} из {total}",
+                backBtn: "← Назад",
+                resetBtn: "Сбросить тест",
+                resultsTitle: "Результаты созвучия",
+                winnerSubtitle: "Ваша сущность совпадает с:",
+                chartTitle: "Спектр вашего Дао:",
+                chartTip: "(Нажмите на любого Сола ниже, чтобы прочесть описание)",
+                restartBtn: "Пройти тест заново",
+                disagree: "Не согласен",
+                neutral: "Нейтрально",
+                agree: "Согласен",
+                resetConfirm: "Вы действительно хотите сбросить прогресс и начать тест заново?"
+            }
+        };
+
+        // База данных вопросов
+        const questions = {
+            1: {
+                ru: "Я охотнее проведу свободное время в одиночестве за изучением сложной темы или освоением нового навыка, чем пойду на шумную вечеринку.",
+                en: "I would rather spend my free time alone studying a complex topic or learning a new skill than go to a noisy party.",
+                impact: {"Yi": 1, "Nuwa": -1}
+            },
+            2: {
+                ru: "Для меня сильным внутренним стимулом является желание доказать свою правоту и превосходство тем, кто во мне сомневался.",
+                en: "A strong inner motivator for me is the desire to prove I am right and superior to those who doubted me.",
+                impact: {"Yi": 1, "Goumang": 1, "Kuafu": -1}
+            },
+            3: {
+                ru: "Я скептически отношусь к чужой интуиции, предчувствиям или \"внутреннему голосу\", если они не подкреплены логикой и фактами.",
+                en: "I am skeptical of other people's intuition, premonitions, or 'inner voice' unless they are supported by logic and facts.",
+                impact: {"Yi": 1, "Eigong": 1, "LadyEthereal": -1, "Ji": -1}
+            },
+            4: {
+                ru: "Ради успеха крупного дела или спасения проекта я готов пойти на крайне непопулярные и жесткие меры, даже если пострадают чьи-то личные интересы.",
+                en: "For the success of a major cause or to save a project, I am ready to take highly unpopular and harsh measures, even if some people's personal interests suffer.",
+                impact: {"Yi": 1, "Eigong": 1, "LadyEthereal": -1}
+            },
+            5: {
+                ru: "Если я вижу, что близкий человек совершает ошибку, я буду упорно навязывать ему свое решение, потому что уверен, что знаю, как для него лучше.",
+                en: "If I see a loved one making a mistake, I will persistently push my solution on them because I am sure I know what is best for them.",
+                impact: {"Yi": 1, "Goumang": 1, "Ji": -1}
+            },
+            6: {
+                ru: "Я мечтаю добиться успеха и состояться в жизни прежде всего для того, чтобы вернуться в родные места (или в семью) и помочь им процветать.",
+                en: "I dream of achieving success and making a name for myself primarily to return to my homeland (or family) and help them prosper.",
+                impact: {"Kuafu": 1, "Goumang": 1, "Yi": -1}
+            },
+            7: {
+                ru: "Я не стремлюсь к высоким руководящим должностям ради власти и часто чувствую дискомфорт или тревогу от избыточной ответственности.",
+                en: "I do not seek high leadership positions for the sake of power, and I often feel discomfort or anxiety from excessive responsibility.",
+                impact: {"Kuafu": 1, "Yanlao": 1, "Yi": -1, "Jiequan": -1}
+            },
+            8: {
+                ru: "Если я пообещал помочь другу, я буду поддерживать его решения до самого конца, даже если они кажутся опасными или сомнительными со стороны.",
+                en: "If I promised to help a friend, I will support their decisions to the very end, even if they seem dangerous or questionable from the outside.",
+                impact: {"Kuafu": 1, "Fuxi": 1, "Eigong": -1}
+            },
+            9: {
+                ru: "Я склонен долго винить себя в неудачах или бедах, случившихся с моими близкими, даже если объективно не мог напрямую на них повлиять.",
+                en: "I tend to blame myself for a long time for failures or misfortunes that happen to my loved ones, even if I could not directly influence them.",
+                impact: {"Kuafu": 1, "LadyEthereal": 1, "Jiequan": -1}
+            },
+            10: {
+                ru: "Я бережно храню старые вещи, подарки, открытки и памятные сувениры ушедших из моей жизни людей, так как для меня это важная часть их наследия.",
+                en: "I carefully keep old things, gifts, postcards, and mementos of people who left my life, as they are an important part of their legacy.",
+                impact: {"Kuafu": 1, "Yanlao": 1, "Ji": -1}
+            },
+            11: {
+                ru: "Мой интерес к работе или учебе изначально был вызван желанием победить бедность, несправедливость и помочь тем, кто оказался внизу социальной лестницы.",
+                en: "My interest in work or study was initially sparked by a desire to defeat poverty, injustice, and help those at the bottom of the social ladder.",
+                impact: {"Goumang": 1, "LadyEthereal": 1, "Jiequan": -1}
+            },
+            12: {
+                ru: "Меня глубоко уязвляет и злит, когда руководитель или авторитетный для меня человек открыто выделяет \"любимчика\", игнорируя мои заслуги.",
+                en: "It deeply hurts and angers me when a leader or someone authoritative openly singles out a 'favorite' while ignoring my merits.",
+                impact: {"Goumang": 1, "Kuafu": -1}
+            },
+            13: {
+                ru: "Я считаю, что неорганизованными или неквалифицированными людьми нужно жестко руководить, направляя их, иначе без контроля они всё испортят.",
+                en: "I believe that unorganized or unqualified people must be strictly managed and directed, otherwise they will ruin everything without control.",
+                impact: {"Goumang": 1, "Eigong": 1, "LadyEthereal": -1}
+            },
+            14: {
+                ru: "Вырвавшись из тяжелых или стесненных условий, для меня важно окружить себя статусными, дорогими вещами, чтобы подчеркнуть, как высоко я поднялся.",
+                en: "Having broken free from difficult or constrained conditions, it is important for me to surround myself with high-status, expensive things to emphasize how high I have risen.",
+                impact: {"Goumang": 1, "Nuwa": 1, "Yi": -1, "Ji": -1}
+            },
+            15: {
+                ru: "Когда я беру кого-то слабого под свою опеку, я требую от него ответного послушания, преданности и уважения моих правил.",
+                en: "When I take someone weak under my wing, I demand mutual obedience, loyalty, and respect for my rules in return.",
+                impact: {"Goumang": 1, "Jiequan": 1, "Kuafu": -1}
+            },
+            16: {
+                ru: "Раньше я бунтовал против семейных правил или традиций, но с возрастом понял их глубокую ценность и теперь стараюсь их соблюдать.",
+                en: "I used to rebel against family rules or traditions, but with age, I understood their deep value and now try to respect them.",
+                impact: {"Yanlao": 1, "Yi": -1}
+            },
+            17: {
+                ru: "Я считаю, что сохранение истории, старинных семейных ценностей и традиционных ремесел важнее, чем сиюминутная практическая польза.",
+                en: "I believe that preserving history, old family values, and traditional crafts is more important than immediate practical benefits.",
+                impact: {"Yanlao": 1, "Yi": -1, "Eigong": -1}
+            },
+            18: {
+                ru: "Для меня важно регулярно почитать память ушедших родственников через семейные ритуалы, посещение памятных мест или сохранение их портретов.",
+                en: "It is important for me to regularly honor the memory of deceased relatives through family rituals, visiting memorial sites, or keeping their portraits.",
+                impact: {"Yanlao": 1, "Kuafu": 1}
+            },
+            19: {
+                ru: "Я испытываю сильную тревогу перед проверками или гневом руководства, если по моей вине случайно пострадает дорогое имущество компании.",
+                en: "I feel intense anxiety before inspections or management's anger if expensive company property is accidentally damaged through my fault.",
+                impact: {"Yanlao": 1, "Jiequan": -1, "Yi": -1}
+            },
+            20: {
+                ru: "В острых спорах я предпочитаю взывать к морали, читать нотации или призывать к благоразумию противника вместо того, чтобы вступать в прямую открытую ссору.",
+                en: "In sharp arguments, I prefer to appeal to morality, lecture, or call on the opponent's wisdom rather than engage in a direct open conflict.",
+                impact: {"Yanlao": 1, "Jiequan": -1}
+            },
+            21: {
+                ru: "Я считаю, что по-настоящему сильный характер закаляется только в суровых условиях, через жесткие ограничения и физическое преодоление.",
+                en: "I believe that a truly strong character is tempered only in harsh conditions, through strict limitations and physical trials.",
+                impact: {"Jiequan": 1, "Nuwa": -1}
+            },
+            22: {
+                ru: "Ради достижения идеальной физической формы или выносливости я готов идти на экстремальные диеты, изнуряющие тренировки или пробовать жесткие препараты.",
+                en: "To achieve perfect physical shape or endurance, I am ready to undergo extreme diets, exhausting training, or try harsh substances.",
+                impact: {"Jiequan": 1, "Yi": 1, "LadyEthereal": -1}
+            },
+            23: {
+                ru: "Я мечтаю вернуть авторитет и былое влияние своей семье (или делу), чтобы заставить уважать нас тех, кто когда-то нанес нам обиду.",
+                en: "I dream of restoring authority and former influence to my family (or cause) to force respect from those who once offended us.",
+                impact: {"Jiequan": 1, "Goumang": 1}
+            },
+            24: {
+                ru: "В условиях жесткой конкуренции я считаю допустимым использовать любые уловки, обходить правила и действовать эгоистично, ведь выживает сильнейший.",
+                en: "In conditions of fierce competition, I think it is acceptable to use any tricks, bypass rules, and act selfishly, because only the strongest survive.",
+                impact: {"Jiequan": 1, "Eigong": 1, "Kuafu": -1}
+            },
+            25: {
+                ru: "Я не верю в гороскопы, знаки судьбы или предначертанность: человек строит свою жизнь исключительно силой собственной воли и действием.",
+                en: "I do not believe in horoscopes, signs of fate, or destiny: a person builds their life solely through the power of their own will and action.",
+                impact: {"Jiequan": 1, "Yi": 1, "Ji": -1}
+            },
+            26: {
+                ru: "Когда реальность становится слишком давящей, серой или болезненной, я предпочитаю погружаться в свои фантазии, книги, игры или воспоминания.",
+                en: "When reality becomes too oppressive, gray, or painful, I prefer to immerse myself in my fantasies, books, games, or memories.",
+                impact: {"LadyEthereal": 1, "Nuwa": 1, "Yi": -1, "Eigong": -1}
+            },
+            27: {
+                ru: "Я годами храню тяжелую душевную боль и чувство вины, если мои искренние попытки помочь людям в итоге случайно обернулись для них бедой.",
+                en: "I keep heavy emotional pain and guilt for years if my sincere attempts to help people ended up accidentally causing them trouble.",
+                impact: {"LadyEthereal": 1, "Kuafu": 1, "Jiequan": -1}
+            },
+            28: {
+                ru: "Я никогда не поддержу проект или решение, которые требуют причинения вреда или жестокого обращения с кем-то, даже если это обещает огромную пользу для всех остальных.",
+                en: "I will never support a project or decision that requires causing harm or cruel treatment to someone, even if it promises massive benefits to everyone else.",
+                impact: {"LadyEthereal": 1, "Yi": -1, "Eigong": -1}
+            },
+            29: {
+                ru: "Иногда мне кажется, что я заслуживаю того плохого, что со мной происходит, и я подсознательно наказываю себя за старые ошибки.",
+                en: "Sometimes it seems to me that I deserve the bad things happening to me, and I subconsciously punish myself for old mistakes.",
+                impact: {"LadyEthereal": 1, "Jiequan": -1}
+            },
+            30: {
+                ru: "Больше всего в моменты душевного кризиса мне нужно, чтобы меня не заваливали практическими советами, а просто выслушали, обняли и разделили мою боль.",
+                en: "Most of all during moments of emotional crisis, I don't need to be showered with practical advice; I just need to be listened to, hugged, and have my pain shared.",
+                impact: {"LadyEthereal": 1, "Kuafu": 1, "Yi": -1}
+            },
+            31: {
+                ru: "Я умею сохранять холодную голову во время кризисов и форс-мажоров, видя в них отличный шанс для личного или карьерного роста.",
+                en: "I know how to keep a cool head during crises and emergencies, seeing them as an excellent opportunity for personal or career growth.",
+                impact: {"Fuxi": 1, "Yi": 1, "LadyEthereal": -1}
+            },
+            32: {
+                ru: "Я готов взять на себя всю тяжелую рутину, бытовые проблемы и финансовые вопросы, чтобы мои близкие могли спокойно радоваться жизни и ни о чем не тревожиться.",
+                en: "I am ready to take on all heavy routines, household chores, and financial issues so that my loved ones can enjoy life peacefully and not worry about anything.",
+                impact: {"Fuxi": 1, "Kuafu": 1, "Nuwa": -1}
+            },
+            33: {
+                ru: "Я готов всерьез заниматься делом, которое мне искренне нравится (например, творчеством или необычным хобби), даже если мое окружение считает это пустой тратой времени.",
+                en: "I am ready to seriously pursue what I genuinely enjoy (e.g., creative work or an unusual hobby), even if my environment considers it a waste of time.",
+                impact: {"Fuxi": 1, "Nuwa": 1, "Yanlao": -1}
+            },
+            34: {
+                ru: "Я с подозрением отношусь к людям, которые предлагают разрушить старые проверенные правила ради туманных реформ и перемен.",
+                en: "I am suspicious of people who propose destroying old proven rules for the sake of vague reforms and changes.",
+                impact: {"Fuxi": 1, "Yanlao": 1, "Yi": -1}
+            },
+            35: {
+                ru: "Даже если в моих отношениях с близким человеком наступят тяжелые времена, я втайне сохраню теплое отношение и память о лучших моментах, проведенных вместе.",
+                en: "Even if my relationship with a loved one hits hard times, I will secretly preserve a warm attitude and memories of the best moments spent together.",
+                impact: {"Fuxi": 1, "Kuafu": 1}
+            },
+            36: {
+                ru: "Если у меня в жизни черная полоса или депрессия, я предпочитаю отвлечься: устроить вечеринку, пойти в клуб или заняться шопингом, а не копаться в проблемах.",
+                en: "If I have a bad patch or depression, I prefer to distract myself: throw a party, go to a club, or go shopping, rather than dig into problems.",
+                impact: {"Nuwa": 1, "Yi": -1}
+            },
+            37: {
+                ru: "Я склонен до последнего игнорировать тревожные звоночки в поведении или здоровье близких, уверяя себя и окружающих, что \"всё наладится само собой\".",
+                en: "I tend to ignore warning signs in my loved ones' behavior or health until the last moment, reassuring myself and others that 'everything will work itself out.'",
+                impact: {"Nuwa": 1, "Yi": -1}
+            },
+            38: {
+                ru: "Я с трудом переношу бытовой дискомфорт, грубую обстановку или отсутствие красоты вокруг — это способно выбить меня из колеи сильнее, чем абстрактные глобальные проблемы.",
+                en: "I have a hard time tolerating physical discomfort, crude surroundings, or a lack of beauty—it can throw me off balance more than abstract global problems.",
+                impact: {"Nuwa": 1, "Fuxi": -1}
+            },
+            39: {
+                ru: "Я люблю привлекать к себе внимание, драматизировать события и вести себя так, будто моя жизнь — это красивое театральное представление.",
+                en: "I love to attract attention, dramatize events, and behave as if my life is a beautiful theatrical performance.",
+                impact: {"Nuwa": 1, "Fuxi": 1, "Kuafu": -1}
+            },
+            40: {
+                ru: "Для меня невыносима мысль о расставании или потере любимого человека; я готов разделить с ним любые проблемы и пойти на дно вместе с ним, лишь бы не оставаться одному.",
+                en: "For me, the thought of parting with or losing a loved one is unbearable; I am ready to share any troubles with them and go down with them just to avoid being left alone.",
+                impact: {"Nuwa": 1, "Yi": -1}
+            },
+            41: {
+                ru: "Я умею ценить мимолетные моменты жизни (красивый закат, случайный разговор) и понимаю, что попытки удержать их или повторить только портят впечатление.",
+                en: "I know how to appreciate fleeting moments of life (a beautiful sunset, a casual conversation) and realize that attempts to hold onto or repeat them only ruin the impression.",
+                impact: {"Ji": 1, "Yanlao": -1}
+            },
+            42: {
+                ru: "В компании или на работе я предпочитаю роль созерцателя — я тихо наблюдаю за поведением людей и развитием событий, редко вмешиваясь без крайней необходимости.",
+                en: "In a company or at work, I prefer the role of an observer—I quietly watch people's behavior and the development of events, rarely intervening unless absolutely necessary.",
+                impact: {"Ji": 1, "Yi": -1, "Jiequan": -1}
+            },
+            43: {
+                ru: "Идея жить вечно или очень долго пугает меня, ведь со временем тебе придется увидеть уход всех тех, кого ты успел полюбить.",
+                en: "The idea of living forever or for a very long time frightens me, because over time you would have to see the departure of all those you grew to love.",
+                impact: {"Ji": 1, "Eigong": -1}
+            },
+            44: {
+                ru: "Для меня важно уметь вовремя и красиво уйти: закончить отношения, уволиться с работы или завершить проект на высокой и запоминающейся ноте, без затяжных драм.",
+                en: "It is important for me to know how to leave gracefully and on time: end relationships, quit a job, or complete a project on a high and memorable note without prolonged dramas.",
+                impact: {"Ji": 1, "Kuafu": -1}
+            },
+            45: {
+                ru: "Я часто ловлю себя на мысли, что многие события в моей жизни происходят по невидимому сценарию судьбы, и сопротивляться этому бессмысленно.",
+                en: "I often catch myself thinking that many events in my life happen according to an invisible script of fate, and resisting it is pointless.",
+                impact: {"Ji": 1, "Jiequan": -1}
+            },
+            46: {
+                ru: "Я глубоко убежден, что не существует нерешаемых проблем: если приложить достаточно упорства, знаний и логики, можно найти выход из любой жизненной ситуации.",
+                en: "I am deeply convinced that there are no unsolvable problems: if enough perseverance, knowledge, and logic are applied, a way out of any life situation can be found.",
+                impact: {"Eigong": 1, "Yi": 1}
+            },
+            47: {
+                ru: "Если на кону стоит успех важнейшего дела всей моей жизни, я готов пойти на обман коллег, сокрытие важной информации или манипуляции людьми.",
+                en: "If the success of the most important cause of my entire life is at stake, I am ready to deceive colleagues, conceal vital information, or manipulate people.",
+                impact: {"Eigong": 1, "Jiequan": 1, "LadyEthereal": -1}
+            },
+            48: {
+                ru: "Я люблю обучать и развивать способных людей, но если со временем они начинают спорить со мной или идти против моих базовых принципов, я без жалости прекращаю общение.",
+                en: "I love educating and developing capable people, but if they start to argue with me or go against my core principles over time, I ruthlessly end communication.",
+                impact: {"Eigong": 1, "Yi": 1, "Kuafu": -1}
+            },
+            49: {
+                ru: "Если старый уклад жизни очевидно зашел в тупик, я готов полностью разрушить его и принять любые, даже самые болезненные перемены как шаг вперед.",
+                en: "If the old way of life is obviously at a dead end, I am ready to completely destroy it and accept any, even the most painful, changes as a step forward.",
+                impact: {"Eigong": 1, "Yi": 1, "Yanlao": -1}
+            },
+            50: {
+                ru: "Я абсолютно не умею и не хочу признавать свои поражения: я готов стоять на своем до самого конца, даже если мои действия ведут к полному хаосу или разрыву отношений.",
+                en: "I am absolutely unable and unwilling to admit defeat: I am ready to stand my ground to the very end, even if my actions lead to complete chaos or broken relationships.",
+                impact: {"Eigong": 1, "Jiequan": 1, "Ji": -1}
+            }
+        };
+
+        // База данных персонажей
+        const characters = {
+            Yi: {
+                name: { ru: "И (Yi)", en: "Yi" },
+                desc: {
+                    ru: "Вы прагматичны, умны и целеустремленны. Вы опираетесь исключительно на логику и факты, не терпите слабости и готовы пойти на крайне суровые меры ради достижения глобальной цели. Вы предпочитаете уединение шумной компании и крайне строго оцениваете действия окружающих.",
+                    en: "You are highly pragmatic, intelligent, and target-driven. You rely entirely on logic and facts, do not tolerate weakness, and are prepared to deploy extreme measures for a grand objective. You prefer absolute solitude to loud social gathers."
+                },
+                img: "https://ninesols.wiki.gg/images/YiP.png",
+                imgPos: "object-top"
+            },
+            Kuafu: {
+                name: { ru: "Куафу (Kuafu)", en: "Kuafu" },
+                desc: {
+                    ru: "Вы — оплот надежности, теплоты и преданности. Семья, друзья и память о былом для вас важнее карьерных вершин и власти. Вы тяжело переживаете за ошибки близких, храните воспоминания как святыню и всегда поддержите товарища, даже если он неправ.",
+                    en: "You are a steady pillar of support, warmth, and devotion. Family, friendship, and deep memory of the past weigh heavier to you than high authority. You carry intense empathy for loved ones, keep monuments as sacred relics, and defend them regardless."
+                },
+                img: "https://ninesols.wiki.gg/images/KuafuP.png",
+                imgPos: "object-center"
+            },
+            Goumang: {
+                name: { ru: "Гоуман (Goumang)", en: "Goumang" },
+                desc: {
+                    ru: "Вы стремитесь приносить пользу обществу и защищать слабых, но делаете это через тотальный контроль и железную дисциплину. Вы требовательны к окружающим и жаждете уважения, компенсируя прошлые обиды стремлением окружить себя заслуженным величием.",
+                    en: "You desire to shelter the helpless and elevate society, but you do so strictly through ultimate control and rigid authority. You hold high expectations for subordinates and demand respect, healing old scars by seeking earned grandeur."
+                },
+                img: "https://ninesols.wiki.gg/images/GoumangP.png",
+                imgPos: "object-center"
+            },
+            Yanlao: {
+                name: { ru: "Янь Лао (Yanlao)", en: "Yanlao" },
+                desc: {
+                    ru: "Традиции, мораль и сохранение истории для вас бесценны. С возрастом вы научились уважать вековые правила и порядок. В спорах вы стремитесь взывать к благоразумию, избегаете лишней ответственности и не любите перемен, подрывающих устоявшийся уклад.",
+                    en: "Legacy, code of conduct, and historical lineage are priceless to you. Over the years, you have come to treasure rules and ancient structures. You settle disputes through lecturing, dodge volatile tasks, and reject erratic reforms."
+                },
+                img: "https://ninesols.wiki.gg/images/YanlaoP.png",
+                imgPos: "object-center"
+            },
+            Jiequan: {
+                name: { ru: "Цзецюань (Jiequan)", en: "Jiequan" },
+                desc: {
+                    ru: "Вы верите исключительно в личную силу, преодоление и непреклонную волю. Вы презираете фатализм и считаете, что характер закаляется только в тяжелейшей борьбе. Ради победы в жесткой конкуренции вы способны обойти любые ограничения.",
+                    en: "You acknowledge nothing but individual power, intense conditioning, and survival of the fittest. You look down on fate and believe character is tested only in physical hardship. You readily bend regulations to secure survival."
+                },
+                img: "https://ninesols.wiki.gg/images/JiequanP.png",
+                imgPos: "object-center"
+            },
+            LadyEthereal: {
+                name: { ru: "Госпожа Бабочка (Lady Ethereal)", en: "Lady Ethereal" },
+                desc: {
+                    ru: "Вы обладаете тончайшей душевной организацией, огромной эмпатией и состраданием. Вы не приемлете жестокость ради благих целей. Столкнувшись с болью реальности, вы склонны уходить в мир своих грез и нести бремя вины за былые ошибки.",
+                    en: "You hold a fragile emotional spectrum, deep empathy, and absolute tenderness. You discard any notions of cruel sacrifices. To survive the harsh physical realm, you wander deep inside dreamworlds and harbor profound silent guilt."
+                },
+                img: "https://ninesols.wiki.gg/images/Lady_EtherealP.png",
+                imgPos: "object-top"
+            },
+            Fuxi: {
+                name: { ru: "Фуси (Fuxi)", en: "Fuxi" },
+                desc: {
+                    ru: "Вы — творческая личность, способная на глубокую, тихую преданность. Вы можете взять на себя самую тяжелую бытовую рутину ради того, чтобы ваши близкие жили счастливо. Вы сохраняете хладнокровие в кризисе и твердо держитесь своего Дао.",
+                    en: "You are a creative soul possessing quiet, resilient loyalty. You willingly endure the heaviest domestic burdens just to shield your closest loved ones. You remain levelheaded in critical storms and strictly respect your personal Dao."
+                },
+                img: "https://ninesols.wiki.gg/images/Character_entry_Fuxi.png",
+                imgPos: "object-center"
+            },
+            Nuwa: {
+                name: { ru: "Нюйва (Nuwa)", en: "Nuwa" },
+                desc: {
+                    ru: "Яркая, экспрессивная натура, склонная театрализовать свою жизнь и уходить от серых будней в яркие эмоции. Для вас невыносимо одиночество, и вы готовы разделить любые невзгоды с любимыми людьми, следуя за ними до самого конца.",
+                    en: "A vibrant, expressive persona prone to romantic drama and chasing beautiful, intense sensations over flat routines. You fear separation above all and would gladly descend to absolute ruin with your lover rather than stand alone."
+                },
+                img: "https://ninesols.wiki.gg/images/Character_entry_Nuwa.png",
+                imgPos: "object-center"
+            },
+            Ji: {
+                name: { ru: "Цзи (Ji)", en: "Ji" },
+                desc: {
+                    ru: "Вы — спокойный созерцатель и фаталист. Вы цените красоту момента и умеете вовремя отпускать людей, работу и ситуации без лишней драмы. Вы чувствуете невидимое течение судьбы и предпочитаете не вмешиваться без надобности.",
+                    en: "A peaceful watcher and a natural fatalist. You capture beauty in temporary frames, fully aware that gripping or chasing them only leads to distress. You sense the invisible waves of fate and decline to interrupt its grand design."
+                },
+                img: "https://ninesols.wiki.gg/images/JiP.png",
+                imgPos: "object-center"
+            },
+            Eigong: {
+                name: { ru: "Эйгун (Eigong)", en: "Eigong" },
+                desc: {
+                    ru: "Вы убеждены, что наука, разум и упорство способны сломить любые препятствия. Вы бескомпромиссны в своем деле и готовы использовать сомнительные манипуляции, если на кону стоит триумф вашей идеи. Вы стоите на своем, даже если мир рушится.",
+                    en: "You firmly argue that intelligence, logic, and relentless execution can break any blockade. You are unwavering, turning to questionable deceit if the victory of your research is challenged. You defend your hill even as the sky falls."
+                },
+                img: "https://ninesols.wiki.gg/images/EigongP.png",
+                imgPos: "object-top"
+            },
+            Nobody: {
+                name: { ru: "Никто не победил", en: "No Sol Won" },
+                desc: {
+                    ru: "Ваши ответы оказались слишком сбалансированными, нейтральными или противоречивыми. Ваша душа не имеет достаточного резонанса ни с одним из Солов. Вы остаетесь свободным духом, наблюдающим за конфликтом со стороны.",
+                    en: "Your answers were highly neutral, balanced, or deeply conflicting. Your spirit failed to secure a dominant resonance with any single Sol. You remain an independent wanderer, watching the chaos of New Kunlun from a safe, quiet distance."
+                },
+                img: "https://ninesols.wiki.gg/images/thumb/Shanhai_-_GrottoH.png/180px-Shanhai_-_GrottoH.png",
+                imgPos: "object-center"
+            }
+        };
+
+        const maxScores = {
+            Yi: 25, Kuafu: 17, Jiequan: 17, Eigong: 14, LadyEthereal: 13,
+            Yanlao: 11, Nuwa: 11, Ji: 11, Goumang: 9, Fuxi: 8
+        };
+
+        let currentLanguage = 'en'; // Язык по умолчанию
+        let shuffledQuestionIds = []; // Массив ID вопросов в случайном порядке
+        let currentQuestionIndex = 0; // Текущий индекс в массиве вопросов
+        let userAnswers = []; // Ответы пользователя
+
+        // DOM элементы
+        const startScreen = document.getElementById('start-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultsScreen = document.getElementById('results-screen');
+        
+        const questionNumberText = document.getElementById('question-number');
+        const progressPercentText = document.getElementById('progress-percent');
+        const progressBar = document.getElementById('progress-bar');
+        const questionText = document.getElementById('question-text');
+        const backBtn = document.getElementById('back-btn');
+        const resetBtn = document.getElementById('reset-btn');
+
+        const btnDisagree = document.getElementById('btn-disagree');
+        const btnNeutral = document.getElementById('btn-neutral');
+        const btnAgree = document.getElementById('btn-agree');
+
+        // Функция перемешивания Фишера-Йетса
+        function shuffleArray(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            setLanguage('en');
+        });
+
+        function setLanguage(lang) {
+            currentLanguage = lang;
+            
+            const btnEn = document.getElementById('lang-btn-en');
+            const btnRu = document.getElementById('lang-btn-ru');
+            
+            if (lang === 'en') {
+                btnEn.className = "flex items-center space-x-1.5 px-3 py-1.5 rounded border border-[#EAD69C] bg-[#69A38C] text-[#091F26] text-xs font-black transition-all duration-200 shadow-[0_0_8px_rgba(105,163,140,0.4)]";
+                btnRu.className = "flex items-center space-x-1.5 px-3 py-1.5 rounded border border-[#69A38C]/40 bg-[#091F26]/90 text-[#EAD69C] text-xs font-semibold hover:bg-[#69A38C]/20 transition-all duration-200";
+            } else {
+                btnRu.className = "flex items-center space-x-1.5 px-3 py-1.5 rounded border border-[#EAD69C] bg-[#69A38C] text-[#091F26] text-xs font-black transition-all duration-200 shadow-[0_0_8px_rgba(105,163,140,0.4)]";
+                btnEn.className = "flex items-center space-x-1.5 px-3 py-1.5 rounded border border-[#69A38C]/40 bg-[#091F26]/90 text-[#EAD69C] text-xs font-semibold hover:bg-[#69A38C]/20 transition-all duration-200";
+            }
+
+            document.getElementById('start-title').innerText = i18n[lang].startTitle;
+            document.getElementById('start-desc').innerText = i18n[lang].startDesc;
+            document.getElementById('start-btn').innerText = i18n[lang].startBtn;
+
+            btnDisagree.innerText = i18n[lang].disagree;
+            btnNeutral.innerText = i18n[lang].neutral;
+            btnAgree.innerText = i18n[lang].agree;
+
+            backBtn.innerText = i18n[lang].backBtn;
+            resetBtn.innerText = i18n[lang].resetBtn;
+
+            document.getElementById('results-title').innerText = i18n[lang].resultsTitle;
+            document.getElementById('winner-subtitle-label').innerText = i18n[lang].winnerSubtitle;
+            document.getElementById('chart-title').innerText = i18n[lang].chartTitle;
+            document.getElementById('chart-tip').innerText = i18n[lang].chartTip;
+            document.getElementById('restart-btn').innerText = i18n[lang].restartBtn;
+
+            if (!quizScreen.classList.contains('hidden')) {
+                showQuestion();
+            }
+            if (!resultsScreen.classList.contains('hidden')) {
+                showResults();
+            }
+        }
+
+        function startQuiz() {
+            startScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            
+            // Генерация случайного порядка вопросов при каждом запуске
+            const allIds = Object.keys(questions).map(Number);
+            shuffledQuestionIds = shuffleArray(allIds);
+            currentQuestionIndex = 0;
+            userAnswers = [];
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const totalQuestions = shuffledQuestionIds.length;
+            const currentNumber = currentQuestionIndex + 1;
+            const progress = (currentQuestionIndex / totalQuestions) * 100;
+
+            const progressText = i18n[currentLanguage].questionNo
+                .replace('{current}', currentNumber)
+                .replace('{total}', totalQuestions);
+
+            questionNumberText.innerText = progressText;
+            progressPercentText.innerText = `${Math.round((currentQuestionIndex / totalQuestions) * 100)}%`;
+            progressBar.style.width = `${progress || 2}%`;
+            
+            const currentQuestionId = shuffledQuestionIds[currentQuestionIndex];
+            questionText.innerText = questions[currentQuestionId][currentLanguage];
+
+            backBtn.disabled = currentQuestionIndex === 0;
+        }
+
+        function handleAnswer(value) {
+            const currentQuestionId = shuffledQuestionIds[currentQuestionIndex];
+            userAnswers = userAnswers.filter(ans => ans.questionId !== currentQuestionId);
+            userAnswers.push({ questionId: currentQuestionId, value: value });
+
+            if (currentQuestionIndex < shuffledQuestionIds.length - 1) {
+                currentQuestionIndex++;
+                showQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                showQuestion();
+            }
+        }
+
+        function confirmReset() {
+            if (confirm(i18n[currentLanguage].resetConfirm)) {
+                startQuiz();
+            }
+        }
+
+        function showResults() {
+            quizScreen.classList.add('hidden');
+            resultsScreen.classList.remove('hidden');
+
+            const results = calculateResults(userAnswers);
+            const winnerKey = results.winner;
+            const winnerInfo = characters[winnerKey];
+
+            const imgEl = document.getElementById('winner-image');
+            imgEl.src = winnerInfo.img;
+            imgEl.className = `w-full h-full object-cover ${winnerInfo.imgPos || 'object-center'}`;
+
+            document.getElementById('winner-name').innerText = winnerInfo.name[currentLanguage];
+            document.getElementById('winner-desc').innerText = winnerInfo.desc[currentLanguage];
+
+            // Интерактивный список персонажей
+            const scoresChart = document.getElementById('scores-chart');
+            scoresChart.innerHTML = '';
+
+            const sortedSols = Object.entries(results.scores).sort((a, b) => b[1] - a[1]);
+
+            sortedSols.forEach(([solKey, score]) => {
+                const solData = characters[solKey];
+                const percentage = Math.max(0, Math.min(100, Math.round((score + 1) * 50)));
+
+                const solItem = document.createElement('div');
+                solItem.className = "border border-[#69A38C]/20 rounded-md bg-black/10 overflow-hidden hover:border-[#EAD69C]/40 transition-colors duration-200";
+                
+                solItem.innerHTML = `
+                    <button onclick="toggleAccordion('${solKey}')" class="w-full text-left p-3 focus:outline-none flex flex-col space-y-1.5">
+                        <div class="flex justify-between items-center text-xs md:text-sm font-bold">
+                            <span class="${solKey === winnerKey ? 'text-[#EAD69C]' : 'text-[#69A38C]'} flex items-center gap-1.5">
+                                ${solData.name[currentLanguage]} 
+                                <span class="text-[10px] text-gray-500 font-normal">▼</span>
+                            </span>
+                            <span class="font-mono text-[#EAD69C]">${percentage}%</span>
+                        </div>
+                        <div class="w-full bg-black/50 h-2 rounded-full overflow-hidden border border-[#69A38C]/10">
+                            <div class="h-full rounded-full transition-all duration-1000 ${solKey === winnerKey ? 'bg-[#EAD69C]' : 'bg-[#69A38C]/60'}" style="width: ${percentage}%"></div>
+                        </div>
+                    </button>
+                    <div id="accordion-${solKey}" class="hidden p-4 bg-black/30 border-t border-[#69A38C]/10 flex flex-col md:flex-row gap-4 items-center md:items-start transition-all">
+                        <img src="${solData.img}" class="w-20 h-20 rounded-md border border-[#69A38C]/30 object-cover ${solData.imgPos || 'object-center'} shrink-0" alt="">
+                        <div>
+                            <p class="text-[11px] md:text-xs text-gray-300 leading-relaxed">${solData.desc[currentLanguage]}</p>
+                        </div>
+                    </div>
+                `;
+                scoresChart.appendChild(solItem);
+            });
+        }
+
+        function toggleAccordion(solKey) {
+            const accordion = document.getElementById(`accordion-${solKey}`);
+            if (accordion.classList.contains('hidden')) {
+                accordion.classList.remove('hidden');
+            } else {
+                accordion.classList.add('hidden');
+            }
+        }
+
+        function calculateResults(answers) {
+            let rawScores = { Yi: 0, Kuafu: 0, Goumang: 0, Yanlao: 0, Jiequan: 0, LadyEthereal: 0, Fuxi: 0, Nuwa: 0, Ji: 0, Eigong: 0 };
+
+            answers.forEach(ans => {
+                let impact = questions[ans.questionId].impact;
+                for (let sol in impact) {
+                    if (rawScores.hasOwnProperty(sol)) {
+                        rawScores[sol] += ans.value * impact[sol];
+                    }
+                }
+            });
+
+            let normalizedScores = {};
+            for (let sol in rawScores) {
+                normalizedScores[sol] = rawScores[sol] / maxScores[sol];
+            }
+
+            let winnerKey = Object.keys(normalizedScores).reduce((a, b) => normalizedScores[a] > normalizedScores[b] ? a : b);
+            let maxNormalized = normalizedScores[winnerKey];
+            let maxPercentage = Math.round((maxNormalized + 1) * 50);
+
+            // Порог: строго более 50% (хотя бы 51%)
+            let finalWinner = winnerKey;
+            if (maxPercentage < 51) {
+                finalWinner = "Nobody";
+            }
+
+            return { winner: finalWinner, scores: normalizedScores };
+        }
+
+        function restartQuiz() {
+            startQuiz();
+        }
+    </script>
+</body>
+</html>
